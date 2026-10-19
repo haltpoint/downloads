@@ -5,7 +5,7 @@ microcontrollers through the debug probes you already have: SEGGER J-Link, ST-Li
 Its `doctor` command checks each step between your computer and the chip, and explains in plain
 words what's wrong and how to fix it.
 
-This guide is for **version 0.2.1**.
+This guide is for **version 0.3.0**.
 
 > **J-Link with SAM4E** is checked on our bench: doctor, erase, flash, RTT and `haltpoint test`
 > all ran on an ATSAM4E16C with a J-Link. Please tell us what works and what doesn't on your
@@ -18,19 +18,19 @@ download with `shasum -a 256 -c FILE.sha256` (macOS) or `sha256sum -c FILE.sha25
 
 | System | File | Install |
 |---|---|---|
-| macOS, Apple silicon | `haltpoint-v0.2.1-aarch64-apple-darwin.tar.gz` | Unpack it and put `haltpoint` on your `PATH`, e.g. `/usr/local/bin`. |
-| macOS, Intel | `haltpoint-v0.2.1-x86_64-apple-darwin.tar.gz` | The same. |
+| macOS, Apple silicon | `haltpoint-v0.3.0-aarch64-apple-darwin.tar.gz` | Unpack it and put `haltpoint` on your `PATH`, e.g. `/usr/local/bin`. |
+| macOS, Intel | `haltpoint-v0.3.0-x86_64-apple-darwin.tar.gz` | The same. |
 | Debian, Ubuntu, Raspberry Pi OS | `haltpoint_0.2.0_amd64.deb`, `_arm64.deb` or `_armhf.deb` | `sudo apt install ./haltpoint_0.2.0_amd64.deb`. This also installs USB permission rules for common probes. |
 | Other Linux | `haltpoint-v0.2.0-x86_64-unknown-linux-gnu.tar.gz` (also aarch64 and armv7) | Unpack it and put `haltpoint` on your `PATH`. Install the [probe-rs udev rules](https://probe.rs/docs/getting-started/probe-setup/) so you can open probes without root. |
 | Windows | `haltpoint-v0.2.0-x86_64-pc-windows-msvc.zip` | Unpack it and put `haltpoint.exe` somewhere on your `PATH`. |
 
 ### Downloads
 
-Version 0.2.1 is available for macOS. Linux and Windows stay on 0.2.0 for now. Their doctor
+Version 0.3.0 is available for macOS. Linux and Windows stay on 0.2.0 for now. Their doctor
 needs `--chip` to recognise a SAM4E and has no `--json`.
 
-- [haltpoint-v0.2.1-aarch64-apple-darwin.tar.gz](https://github.com/haltpoint/downloads/raw/main/v0.2.1/haltpoint-v0.2.1-aarch64-apple-darwin.tar.gz) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.2.1/haltpoint-v0.2.1-aarch64-apple-darwin.tar.gz.sha256))
-- [haltpoint-v0.2.1-x86_64-apple-darwin.tar.gz](https://github.com/haltpoint/downloads/raw/main/v0.2.1/haltpoint-v0.2.1-x86_64-apple-darwin.tar.gz) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.2.1/haltpoint-v0.2.1-x86_64-apple-darwin.tar.gz.sha256))
+- [haltpoint-v0.3.0-aarch64-apple-darwin.tar.gz](https://github.com/haltpoint/downloads/raw/main/v0.3.0/haltpoint-v0.3.0-aarch64-apple-darwin.tar.gz) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.3.0/haltpoint-v0.3.0-aarch64-apple-darwin.tar.gz.sha256))
+- [haltpoint-v0.3.0-x86_64-apple-darwin.tar.gz](https://github.com/haltpoint/downloads/raw/main/v0.3.0/haltpoint-v0.3.0-x86_64-apple-darwin.tar.gz) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.3.0/haltpoint-v0.3.0-x86_64-apple-darwin.tar.gz.sha256))
 - [haltpoint_0.2.0_amd64.deb](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_amd64.deb) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_amd64.deb.sha256))
 - [haltpoint_0.2.0_arm64.deb](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_arm64.deb) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_arm64.deb.sha256))
 - [haltpoint_0.2.0_armhf.deb](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_armhf.deb) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_armhf.deb.sha256))
@@ -42,7 +42,7 @@ needs `--chip` to recognise a SAM4E and has no `--json`.
 **macOS:** the binaries aren't signed yet. If macOS refuses to run `haltpoint`, clear the download
 flag once with `xattr -d com.apple.quarantine /usr/local/bin/haltpoint`.
 
-Check the install with `haltpoint --version`, which should print `haltpoint 0.2.1` on macOS
+Check the install with `haltpoint --version`, which should print `haltpoint 0.3.0` on macOS
 (`haltpoint 0.2.0` on Linux and Windows).
 
 ## 2. First connection: J-Link and SAM4E
@@ -132,6 +132,15 @@ Run `haltpoint doctor` first, and send us its full output along with:
 - your system, and `haltpoint --version`,
 - the probe (J-Link model, or SAM-ICE) and the board,
 - the command you ran and what happened.
+
+Release notes for 0.3.0: `haltpoint identify` reports what firmware is on a board and whether it
+matches your files; a product manifest in haltpoint.toml (components, hardware ID, protected
+regions for serials and calibration that survive flashing and erasing); `haltpoint test --uart`
+for firmware that reports over a serial port; faster flashing over J-Link (a 1 MB SAM4E image
+erases and flashes in about 9 s, on a par with SEGGER's JLinkExe on our bench); licence notices
+in a `licenses` folder. Chips whose flash algorithm licences we haven't verified yet are left
+out for now, among them STM32F1, SAM3, SAM4L, SAM4SD, EFM32/EFR32, Renesas RA and GD32;
+`licenses/FLASH-ALGORITHMS.txt` has the full list. SAM4E is unaffected.
 
 Release notes for 0.2.1: doctor identifies SAM4E parts by itself; `haltpoint doctor --json`;
 shell completions and man pages in the Debian package; chips outside the built-in list through
