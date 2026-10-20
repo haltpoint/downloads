@@ -5,7 +5,7 @@ microcontrollers through the debug probes you already have: SEGGER J-Link, ST-Li
 Its `doctor` command checks each step between your computer and the chip, and explains in plain
 words what's wrong and how to fix it.
 
-This guide is for **version 0.3.0**.
+This guide is for **version 0.3.1**.
 
 > **J-Link with SAM4E** is checked on our bench: doctor, erase, flash, RTT and `haltpoint test`
 > all ran on an ATSAM4E16C with a J-Link. Please tell us what works and what doesn't on your
@@ -18,19 +18,19 @@ download with `shasum -a 256 -c FILE.sha256` (macOS) or `sha256sum -c FILE.sha25
 
 | System | File | Install |
 |---|---|---|
-| macOS, Apple silicon | `haltpoint-v0.3.0-aarch64-apple-darwin.tar.gz` | Unpack it and put `haltpoint` on your `PATH`, e.g. `/usr/local/bin`. |
-| macOS, Intel | `haltpoint-v0.3.0-x86_64-apple-darwin.tar.gz` | The same. |
+| macOS, Apple silicon | `haltpoint-v0.3.1-aarch64-apple-darwin.tar.gz` | Unpack it and put `haltpoint` on your `PATH`, e.g. `/usr/local/bin`. |
+| macOS, Intel | `haltpoint-v0.3.1-x86_64-apple-darwin.tar.gz` | The same. |
 | Debian, Ubuntu, Raspberry Pi OS | `haltpoint_0.2.0_amd64.deb`, `_arm64.deb` or `_armhf.deb` | `sudo apt install ./haltpoint_0.2.0_amd64.deb`. This also installs USB permission rules for common probes. |
 | Other Linux | `haltpoint-v0.2.0-x86_64-unknown-linux-gnu.tar.gz` (also aarch64 and armv7) | Unpack it and put `haltpoint` on your `PATH`. Install the [probe-rs udev rules](https://probe.rs/docs/getting-started/probe-setup/) so you can open probes without root. |
 | Windows | `haltpoint-v0.2.0-x86_64-pc-windows-msvc.zip` | Unpack it and put `haltpoint.exe` somewhere on your `PATH`. |
 
 ### Downloads
 
-Version 0.3.0 is available for macOS. Linux and Windows stay on 0.2.0 for now. Their doctor
+Version 0.3.1 is available for macOS. Linux and Windows stay on 0.2.0 for now. Their doctor
 needs `--chip` to recognise a SAM4E and has no `--json`.
 
-- [haltpoint-v0.3.0-aarch64-apple-darwin.tar.gz](https://github.com/haltpoint/downloads/raw/main/v0.3.0/haltpoint-v0.3.0-aarch64-apple-darwin.tar.gz) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.3.0/haltpoint-v0.3.0-aarch64-apple-darwin.tar.gz.sha256))
-- [haltpoint-v0.3.0-x86_64-apple-darwin.tar.gz](https://github.com/haltpoint/downloads/raw/main/v0.3.0/haltpoint-v0.3.0-x86_64-apple-darwin.tar.gz) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.3.0/haltpoint-v0.3.0-x86_64-apple-darwin.tar.gz.sha256))
+- [haltpoint-v0.3.1-aarch64-apple-darwin.tar.gz](https://github.com/haltpoint/downloads/raw/main/v0.3.1/haltpoint-v0.3.1-aarch64-apple-darwin.tar.gz) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.3.1/haltpoint-v0.3.1-aarch64-apple-darwin.tar.gz.sha256))
+- [haltpoint-v0.3.1-x86_64-apple-darwin.tar.gz](https://github.com/haltpoint/downloads/raw/main/v0.3.1/haltpoint-v0.3.1-x86_64-apple-darwin.tar.gz) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.3.1/haltpoint-v0.3.1-x86_64-apple-darwin.tar.gz.sha256))
 - [haltpoint_0.2.0_amd64.deb](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_amd64.deb) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_amd64.deb.sha256))
 - [haltpoint_0.2.0_arm64.deb](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_arm64.deb) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_arm64.deb.sha256))
 - [haltpoint_0.2.0_armhf.deb](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_armhf.deb) ([sha256](https://github.com/haltpoint/downloads/raw/main/v0.2.0/haltpoint_0.2.0_armhf.deb.sha256))
@@ -42,7 +42,7 @@ needs `--chip` to recognise a SAM4E and has no `--json`.
 **macOS:** the binaries aren't signed yet. If macOS refuses to run `haltpoint`, clear the download
 flag once with `xattr -d com.apple.quarantine /usr/local/bin/haltpoint`.
 
-Check the install with `haltpoint --version`, which should print `haltpoint 0.3.0` on macOS
+Check the install with `haltpoint --version`, which should print `haltpoint 0.3.1` on macOS
 (`haltpoint 0.2.0` on Linux and Windows).
 
 ## 2. First connection: J-Link and SAM4E
@@ -87,7 +87,8 @@ Check the install with `haltpoint --version`, which should print `haltpoint 0.3.
 
 | Command | What it does |
 |---|---|
-| `haltpoint flash app.elf` | Writes firmware, verifies it and restarts the chip. Takes ELF, Intel HEX, or a raw `.bin` with `--base 0x00400000` (the SAM4E flash start). |
+| `haltpoint flash app.elf` | Writes firmware, verifies it, restarts the chip and checks it started. If the core locks up (for example because the bootloader isn't flashed, so 0x00400000 is blank), it says so and why; `--require-start` makes that exit 1, for production lines. Takes ELF, Intel HEX, or a raw `.bin` with `--base 0x00400000` (the SAM4E flash start). |
+| `haltpoint identify app.hex` | Says what's on the board (hash, non-blank size, versions, hardware ID) and whether your files match it. The core is halted while flash is read, then carries on; `--no-halt` reads it running, twice. |
 | `haltpoint reset` | Resets the chip and lets it run. `--halt` stops it at the first instruction. |
 | `haltpoint rtt --elf app.elf` | Shows what the firmware prints over SEGGER RTT, and sends lines you type back to it. `--log FILE`, `--grep TEXT` and `--timestamps` help with long sessions. |
 | `haltpoint swo --clock-hz 120000000` | Shows ITM/SWO output. Pass your firmware's core clock. |
@@ -132,6 +133,16 @@ Run `haltpoint doctor` first, and send us its full output along with:
 - your system, and `haltpoint --version`,
 - the probe (J-Link model, or SAM-ICE) and the board,
 - the command you ran and what happened.
+
+Release notes for 0.3.1: `identify` halts the core while it reads, so its hash is the same
+every time and a matching file is reported as matching (reads with the core running sometimes
+returned wrong bytes on the SAM4E); `--no-halt` reads twice instead. It also reads 1 MB in about
+9 s instead of 60 s. Protected regions are read with the core halted and twice before an erase,
+and `--backup-dir DIR` saves them to files. `flash` and `reset` check the core started and say
+why when it didn't, and `doctor` reports a locked-up core. `version_format` reads binary version
+structs; `identify` counts non-blank bytes; the hardware ID can come from a register with a
+`mask`, or the SAM4E user signature or unique ID; `--timing` says "nothing to program" instead
+of 0 KB/s.
 
 Release notes for 0.3.0: `haltpoint identify` reports what firmware is on a board and whether it
 matches your files; a product manifest in haltpoint.toml (components, hardware ID, protected
